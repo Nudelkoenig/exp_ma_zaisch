@@ -3,9 +3,6 @@ import alfred3 as al
 import alfred3_interact as ali
 from thesmuggler import smuggle
 import random
-import numpy as np
-import statistics
-from matplotlib.figure import Figure
 
 # External Sources
 
@@ -17,36 +14,15 @@ screening = smuggle("files/exp_screening.py")
 exp = al.Experiment()
 
 
-class MatchingTimeoutPage(al.Page):
-    title = "Wartezeit überschritten"
+@exp.setup
+def setup(exp):
 
-    def on_exp_access(self):
-        self += al.VerticalSpace("50px")
-        self += al.Text(text="Wartezeit überschritten",
-            align="center",
-        )
-
-
-class WaitingTimeoutPage(al.Page):
-    title = "Wartezeit überschritten"
-    name = "waiting_timeout"
-
-    def on_exp_access(self):
-        self += al.VerticalSpace("50px")
-        self += al.Text(text="Wartezeit überschritten",
-            align="center",
-        )
-
-
-class WaitingExceptionPage(al.Page):
-    title = "Experiment abgebrochen"
-    name = "waiting_exception"
-
-    def on_exp_access(self):
-        self += al.VerticalSpace("50px")
-        self += al.Text(text="Experiment abgebrochen",
-            align="center",
-        )
+    roles = ["judge", "advisor"]
+    block_blind = ali.ParallelSpec(*roles, nslots=126, name="block_blind")
+    block_feedback = ali.ParallelSpec(*roles, nslots=126, name="block_feedback")
+    sequential_blind = ali.ParallelSpec(*roles, nslots=126, name="sequential_blind")
+    sequential_feedback = ali.ParallelSpec(*roles, nslots=126, name="sequential_feedback")
+    exp.plugins.mm = ali.MatchMaker(block_blind, block_feedback, sequential_blind, sequential_feedback, exp=exp)
 
 
 class Match(ali.WaitingPage):
@@ -57,13 +33,6 @@ class Match(ali.WaitingPage):
     wait_timeout = 10 * 60
 
     def wait_for(self):
-        timeout_page = al.Page(title="Experimentaufbau fehlgeschlagen",
-                               name="nomatch_page")
-        timeout_page += al.Text(text="Experimentaufbau fehlgeschlagen")
-
-        self.wait_timeout_page = MatchingTimeoutPage(name="waiting_timeout")
-        self.wait_exception_page = WaitingExceptionPage()
-
         mm = self.exp.plugins.mm
 
         # match to group
@@ -75,17 +44,6 @@ class Match(ali.WaitingPage):
         self.exp.condition = group.spec_name
 
         return True
-
-
-@exp.setup
-def setup(exp):
-
-    roles = ["judge", "advisor"]
-    block_blind = ali.ParallelSpec(*roles, nslots=126, name="block_blind")
-    block_feedback = ali.ParallelSpec(*roles, nslots=126, name="block_feedback")
-    sequential_blind = ali.ParallelSpec(*roles, nslots=126, name="sequential_blind")
-    sequential_feedback = ali.ParallelSpec(*roles, nslots=126, name="sequential_feedback")
-    exp.plugins.mm = ali.MatchMaker(block_blind, block_feedback, sequential_blind, sequential_feedback, exp=exp)
 
 
 class InstructionPagePhase1(al.Page):
@@ -1226,8 +1184,14 @@ class Success(al.Page):
 
         if role == "judge":
             self += al.Text(f"<b> Entscheidungsträger:in</b>", align="center")
+            self += al.Text(f"{role}")
+            self += al.Text(f"{self.exp.condition}")
+            self += al.Text(f"{group.group_id}")
         elif role == "advisor":
             self += al.Text(f"<b> Ratgeber:in </b>", align="center")
+            self += al.Text(f"{role}")
+            self += al.Text(f"{self.exp.condition}")
+            self += al.Text(f"{group.group_id}")
 
 
 class InformedConsentPage(informed_consent.InformedConsent):
