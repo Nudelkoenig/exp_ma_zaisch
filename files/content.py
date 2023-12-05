@@ -147,9 +147,9 @@ screening_page_content = dict(
     ),
     exclusion_title="Teilnahme nicht möglich",
     exclusion_icon="times-circle",
-    exclusion_message="Leider kannst du an diesem Experiment nicht teilnehmen, da du"
-                      "bereits and dieser oder einer sehr ähnlichen Studie teilgenommen"
-                      "haben.<br><br>"
+    exclusion_message="Leider kannst du an diesem Experiment nicht teilnehmen, da du "
+                      "bereits an dieser oder einer sehr ähnlichen Studie teilgenommen "
+                      "hast.<br><br>"
                       "Bei Fragen kannst du dich gerne an folgende E-Mail-Adresse wenden: "
                       "alina.zain@stud.uni-goettingen.de",
 )
