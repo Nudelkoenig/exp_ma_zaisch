@@ -1,2 +1,2 @@
-# exp_ba_sardor
-Bachelorarbeit Sarnighausen &amp; Dorsch - Der Effekt abwegiger Ratschläge auf die Gewichtung von Aggregaten vs. Mengen von Einzelratschlägen
+# exp_ma_zaisch
+Masterarbeit Zain &amp; Schmitz - Replication Normative Influence on Advice Taking in Judge-Advisor-Systems - Study 4
