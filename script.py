@@ -504,11 +504,8 @@ class PhaseOneInitialEstimate(al.Page):
 class SyncPage(ali.WaitingPage):
     def wait_for(self):
         g = self.exp.plugins.group
-        data = self.vargs.taskdata
         i = self.vargs.i
         suffix = self.vargs.get("suffix", "")
-        stimulus = data["stimulus"]
-        description = data["label"]
 
         estimates = [m.values.get(f"estimation_trial_{i:02}" + suffix) for m in g.members()]
         return all(estimates)
@@ -519,9 +516,6 @@ class SyncPage2(ali.WaitingPage):
         judge = self.exp.plugins.group.judge
         data = self.vargs.taskdata
         i = self.vargs.i
-        suffix = self.vargs.get("suffix", "")
-        stimulus = data["stimulus"]
-        description = data["label"]
 
         estimates = [judge.values.get(f'trial_{i:02d}_final_estimate')]
         return all(estimates)
@@ -689,7 +683,6 @@ class JudgeAccuracyPage(al.Page):
     name = "judge_accuracy_page"
 
     def on_first_show(self):
-        group = self.exp.plugins.group
 
         self += al.Text(
             "Bitte denk noch einmal über deine eben abgegebenen Schätzungen und die von deinem:r Partner:in erhaltenen "
@@ -800,7 +793,6 @@ class JudgeFairnessPage(al.Page):
     name = "judge_fairness_page"
 
     def on_first_show(self):
-        group = self.exp.plugins.group
 
         self += al.Text(
             "Bitte denk an diejenigen Durchgänge, in denen du den Ratschlag deines:r Partner:in berücksichtigt "
@@ -855,7 +847,6 @@ class JudgeFairnessPage2(al.Page):
     name = "judge_fairness_page2"
 
     def on_first_show(self):
-        group = self.exp.plugins.group
 
         self += al.Text(
             "Nun wollen wir es noch einmal etwas genauer wissen. Wir haben hier eine Reihe von verschiedenen "
@@ -1131,7 +1122,6 @@ class AdvisorManiCheckPage(al.Page):
     name = "advisor_mani_check_page"
 
     def on_first_show(self):
-        group = self.exp.plugins.group
 
         self += al.Text(content.seriousness_mani_check,
                         align="center",
@@ -1244,6 +1234,17 @@ class InformedConsentPage(informed_consent.InformedConsent):
     content = content.informed_consent_content
 
 
+class TaskGenerationPage(al.AutoForwardPage):
+    title = "Experiment erstellt"
+    name = "task_generation_page"
+
+    def on_first_show(self):
+
+        data = list(self.section.exp.read_csv_todict("files/quiz_questions.csv", delimiter=","))
+        self.section.shuffle_data(data) # self = self.section
+        self.section.add_task_phase(data)
+
+
 exp += al.ForwardOnlySection(name="main")
 
 
@@ -1253,6 +1254,7 @@ class InstructionSection(al.Section):
     allow_backward = False
     allow_jumpfrom = False
     allow_jumpto = False
+
 
 @exp.member(of_section="InstructionSection")
 class LandingPage(al.Page):
@@ -1303,11 +1305,11 @@ class PhaseOne(al.Section):
     def on_exp_access(self):
         self += Success(name="success")
         print(self.exp.condition)
-
-    def on_enter(self):
-        data = list(self.exp.read_csv_todict("files/quiz_questions.csv", delimiter=","))
-        self.shuffle_data(data) # self = self.section
-        self.add_task_phase(data)
+        self += TaskGenerationPage(timeout=0)
+    #def on_enter(self):
+     #   data = list(self.exp.read_csv_todict("files/quiz_questions.csv", delimiter=","))
+      #  self.shuffle_data(data) # self = self.section
+       # self.add_task_phase(data)
 
     def shuffle_data(self, data: list):
         group = self.exp.plugins.group
